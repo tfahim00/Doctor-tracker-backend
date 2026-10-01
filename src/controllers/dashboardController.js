@@ -27,5 +27,12 @@ exports.getDashboard = async (req, res) => {
     ]),
   ]);
 
-  res.json({ totalDoctors, totalPatients, patientsPerDoctor, patientsByDate });
+  // Fill days with no new patients so the chart shows them as 0 instead of skipping them.
+  const counts = Object.fromEntries(patientsByDate.map((d) => [d.date, d.count]));
+  const days = Array.from({ length: 30 }, (_, i) => {
+    const date = new Date(since.getTime() + i * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    return { date, count: counts[date] || 0 };
+  });
+
+  res.json({ totalDoctors, totalPatients, patientsPerDoctor, patientsByDate: days });
 };
